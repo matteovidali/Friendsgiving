@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>It's time to settle yer debts!</title>
+    <style>
+
+        #selectAll:checked ~ #amountInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Heres who wants your dabloons</h1>
+    <ul>
+        {% for id, value in person.owes.items() %}
+            <li>{{ ids[id] }}: ${{ value }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <form action="/{{ secret }}/process_payment" method="post">
+        <label for="nameSelector">Select a Name:</label>
+        <select name="name" id="nameSelector">
+            {% for id in person.owes.keys() %}
+                <option value="{{ ids[id] }}">{{ ids[id] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="selectAll">All</label>
+        <input type="checkbox" id="selectAll" name="selectAll">
+
+        <label for="amountInput">Enter an Amount:</label>
+        <input type="number" id="amountInput" name="amount" value={{ person.owes['name'] }} step="0.01">
+
+
+        <button type="submit">Submit</button>
+    </form>
+
+
+</body>
+</html>
