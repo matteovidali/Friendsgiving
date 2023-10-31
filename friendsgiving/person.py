@@ -4,9 +4,9 @@ import json
 
 class Person:
     def __init__(self, name, id=None, paid=0, owes={}, what_for={}):
-        self.tz = timezone(-timedelta(hours=5))
         self.name = name
         self.id = name.lower() if id is None else id
+        self.tz = timezone(-timedelta(hours=5))
         self.i_pay_file = Path(f'payfiles/{self.id}_pay_file')
         self.owes = owes
         self.total_out = 0
@@ -16,7 +16,10 @@ class Person:
 
     def buys(self, item, value):
         with open(self.i_pay_file, "a+") as out_file:
-            out_file.write(f"{self.name}, PAID: ${float(value):.2f}, For: {item}, Time: {datetime.now(tz=self.tz).strftime('%Y_%m_%d %H:%M:%S')}\n")
+            out_file.write(f"{self.name}, PAID: ${float(value):.2f}, "
+                           f"For: {item}, Time: {datetime.now(tz=self.tz).strftime('%Y_%m_%d %H:%M:%S')}\n")
+        self.total_out += float(value)
+        self.update()
 
     def get_or_set_self_id(self):
         if not self.id_file.is_file():
@@ -28,13 +31,13 @@ class Person:
             self.i_pay_file = Path(s['i_pay_file'])
             self.owes = s['owes']
             self.what_for = s['what_for']
-            self.total_out = s['total_out']
+            self.total_out = float(s['total_out'])
     
     def pays(self, payee, amount, all=False):
         if all:
             self.owes[payee] = 0
         else:
-            self.owes[payee] -= round(amount, 2)
+            self.owes[payee] = round(self.owes[payee] - float(amount), 2)
         self.update()
 
     def update(self):

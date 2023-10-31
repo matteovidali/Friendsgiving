@@ -25,7 +25,9 @@ def create_people():
         if p.is_file():
             person = Person(name, id=id)
         else:
-            person = Person(name, id=id, owes={g: 0 for g in ids.keys() if g != id}, what_for={g: [] for g in ids.keys() if g != id})
+            person = Person(name, id=id, 
+                            owes={g: 0 for g in ids.keys() if g != id}, 
+                            what_for={g: [] for g in ids.keys() if g != id})
         people[person.id] = person
 
 @app.route('/')
@@ -37,13 +39,12 @@ def custom(id):
     global people
     if id not in people.keys():
         return f"That is not an appropriate secret key {people.keys()}"
-    print(id)
     return render_template('home.html', name=get_name_from_id(id), id=id)
 
 @app.route('/<id>/expense_splitter/')
 def expense_form(id):
     global people
-    return render_template('payment_form.html', people=[ p for p in people.values() if p.id != id ], buyer=get_name_from_id(id))
+    return render_template('payment_form.html', people=people.values(), buyer=get_name_from_id(id))
 
 @app.route('/<id>/what_do_i_owe/')
 def what_do_i_owe(id):
@@ -61,15 +62,13 @@ def process_form():
     #print(f"Amount: ${amount}")
     #print(f"Split with: {', '.join(split_with)}")
     people[buyer_id].buys(item, amount)
-    
     split = 0
     for n in split_with:
         n = get_id_from_name(n)
         if n == buyer_id:
             continue
         people[n].owes[buyer_id] += round(float(amount) / len(split_with), 2)
-
-        split = round(float(amount) / (len(split_with)+1), 2)
+        split = round(float(amount) / len(split_with), 2)
         people[n].what_for[buyer_id].append(item)
         people[n].update()
 
