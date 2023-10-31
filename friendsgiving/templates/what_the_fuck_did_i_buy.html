@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html>
+<style>
+table, th, td {
+  border:1px solid black;
+}
+</style>
 <head>
     <title>What the FUCK did I purchase?</title>
 </head>
 <body>
-    <h1>Ya Shared yer precious coin... Ensure yer repayed in due time!</h1>
-    <form action="{{ id }}/process" method="post">
-        <label for="item">What the fuck ya plundered?</label>
-        <input type="text" id="item" name="item" required><br><br>
-
-        <label for="amount">How much did it cost ya?</label>
-        <input type="number" id="amount" name="amount" step="0.01" required><br><br>
-
-        <input type="text" id="buyer" name="buyer" value="{{ buyer }}" readonly>
-
-        <p>Whos Dabloons ya need?:</p>
-        {% for person in people %}
-        <input type="checkbox" id="{{ person.id }}" name="{{ person.name }}" value="{{ person.name }}" checked>
-        <label for="{{ person.id }}">{{ person.name }}</label><br>
-        {% endfor %}
-
-        <input type="submit" value="Submit">
-    </form>
+  <table style="width:100%">
+    <tr>
+      <th>What Ya Paid For</th>
+      <th>How Much Ya Paid</th>
+      <th>When Ya Paid</th>
+    </tr>
+    {% for item, value, time in stuff %}
+    <tr>
+      <td>{{item}}</td>
+      <td>{{value}}</td>
+      <td>{{time}}</td>
+    </tr>
+    {% endfor %}
+  </table>
 </body>
 </html>
-

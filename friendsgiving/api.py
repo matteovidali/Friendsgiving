@@ -55,7 +55,8 @@ def what_do_i_owe(id):
 @app.route('/<id>/what_the_fuck_did_i_buy/')
 def what_the_fuck_did_i_buy(id):
     global people,ids
-    return render_template('what_the_fuck_did_i_buy.html', person=people[id], secret=id, ids=ids)
+    stuff = people[id].get_purchases()
+    return render_template('what_the_fuck_did_i_buy.html', person=people[id], stuff=stuff)
 
 @app.route('/process/', methods=['POST'])
 def process_form():

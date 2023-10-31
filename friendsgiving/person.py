@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import json
+import csv
 
 ids = {"156156": "Matteo", "252252": "Nia",
        "363363": "Grace", "454454": "Nick", 
@@ -31,9 +32,11 @@ class Person:
         self.get_or_set_self_id()
 
     def buys(self, item, value):
+        string = f"{item},${float(value):.2f}," +\
+                 f"{datetime.now(tz=self.tz).strftime('%Y_%m_%d %H:%M:%S')}\n"
         with open(self.i_pay_file, "a+") as out_file:
-            out_file.write(f"{self.name}, PAID: ${float(value):.2f}, "
-                           f"For: {item}, Time: {datetime.now(tz=self.tz).strftime('%Y_%m_%d %H:%M:%S')}\n")
+            out_file.write(string)
+                           
         self.total_out += float(value)
         self.update()
 
@@ -61,6 +64,15 @@ class Person:
         self.buys(f"Payed {payee_name}", amount)
         self.update()
 
+    def get_purchases(self):
+        purchases = []
+        with open(self.i_pay_file) as in_file:
+            reader = csv.reader(in_file)
+            for line in reader:
+                purchases.append(line)
+        return purchases
+
+
     def update(self):
         with open(self.id_file, 'w+') as jsonfile:
             json.dump(self.asdict(), jsonfile)
@@ -71,4 +83,3 @@ class Person:
                 'owes': self.owes, 
                 'what_for': self.what_for, 
                 'total_out':self.total_out}
-

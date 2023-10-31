@@ -2,6 +2,8 @@ SERVER_DIR='/var/www/friendsgiving/friendsgiving'
 
 .PHONY: deps-local
 deps-local:
+	sudo apt update
+	sudo apt install make
 	pip3 install -r requirements.txt
 
 .PHONY: run
