@@ -1,22 +1,15 @@
 from flask import Flask, render_template, request
 from pathlib import Path
-from person import Person, get_name_or_id
+from person import Person
 
-app = Flask(__name__)
 people = {}
+
 ids = {"156156": "Matteo", "252252": "Nia",
        "363363": "Grace", "454454": "Nick", 
        "545545": "Zoe", "656656": "Kye"}
 
-def get_name_from_id(id):
-    global ids
-    return get_name_or_id(id, ids)
+app = Flask(__name__)
 
-def get_id_from_name(name):
-    global ids
-    return get_name_or_id(name, ids)
-
-@app.before_first_request
 def create_people():
     global people, ids
     
@@ -29,6 +22,26 @@ def create_people():
                             owes={g: 0 for g in ids.keys() if g != id}, 
                             what_for={g: [] for g in ids.keys() if g != id})
         people[person.id] = person
+
+
+app.before_request_funcs = [(None, create_people())]
+def get_name_or_id(name_or_id: str,  ids: dict):
+    name_or_id = name_or_id.lower()
+
+    if name_or_id in [x.lower() for x in ids.values()]:
+        for key, value in ids.items():
+            if value.lower() == name_or_id:
+                return key
+
+    return ids[name_or_id]
+
+def get_name_from_id(id):
+    global ids
+    return get_name_or_id(id, ids)
+
+def get_id_from_name(name):
+    global ids
+    return get_name_or_id(name, ids)
 
 @app.route('/')
 def home():
@@ -51,6 +64,11 @@ def what_do_i_owe(id):
     global people,ids
     return render_template('what_do_i_owe.html', person=people[id], secret=id, ids=ids)
 
+@app.route('/<id>/what_the_fuck_did_i_buy/')
+def what_the_fuck_did_i_buy(id):
+    global people,ids
+    return render_template('what_the_fuck_did_i_buy.html', person=people[id], secret=id, ids=ids)
+
 @app.route('/process/', methods=['POST'])
 def process_form():
     item = request.form['item']
@@ -58,9 +76,6 @@ def process_form():
     amount = request.form['amount']
     split_with = [key for key in request.form if key != 'item' and key != 'amount' and key != 'buyer']
 
-    #print(f"Item: {item}")
-    #print(f"Amount: ${amount}")
-    #print(f"Split with: {', '.join(split_with)}")
     people[buyer_id].buys(item, amount)
     split = 0
     for n in split_with:

@@ -34,10 +34,14 @@ class Person:
             self.total_out = float(s['total_out'])
     
     def pays(self, payee, amount, all=False):
+        amount = 0
         if all:
+            amount = self.owes[payee]
             self.owes[payee] = 0
         else:
-            self.owes[payee] = round(self.owes[payee] - float(amount), 2)
+            amount = round(self.owes[payee] - float(amount), 2)
+            self.owes[payee] = amount
+        self.buys(f"Payed {payee}", amount)
         self.update()
 
     def update(self):
@@ -51,12 +55,3 @@ class Person:
                 'what_for': self.what_for, 
                 'total_out':self.total_out}
 
-def get_name_or_id(name_or_id: str,  ids: dict):
-    name_or_id = name_or_id.lower()
-
-    if name_or_id in [x.lower() for x in ids.values()]:
-        for key, value in ids.items():
-            if value.lower() == name_or_id:
-                return key
-
-    return ids[name_or_id]

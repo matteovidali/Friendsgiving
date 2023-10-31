@@ -1,12 +1,23 @@
 SERVER_DIR='/var/www/friendsgiving/friendsgiving'
-deps:
+
+.PHONY: deps-local
+deps-local:
+	pip3 install -r requirements.txt
+
+.PHONY: run
+run:
+	python3 friendsgiving/api.py
+
+.PHONY: deps-server
+deps-server:
 	sudo apt update
 	sudo apt install -y apache2 libapache2-mod-wsgi python-dev python3-pip
 	sudo ufw allow 'Apache'
 	sudo systemctl status apache2
 	pip3 install -r requirements.txt
 
-build:
+.PHONY: build-server
+build-server:
 	sudo mkdir /var/www/friendsgiving
 	cp -r ./friendsgiving /var/www/friendsgiving/
 	mv $(SERVER_DIR)/api.py $(SERVER_DIR)/__init__.py
