@@ -2,6 +2,22 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import json
 
+ids = {"156156": "Matteo", "252252": "Nia",
+       "363363": "Grace", "454454": "Nick", 
+       "545545": "Zoe", "656656": "Kye"}
+
+def get_name_or_id(name_or_id: str, id: dict={}):
+    global ids
+
+    name_or_id = name_or_id.lower()
+
+    if name_or_id in [x.lower() for x in ids.values()]:
+        for key, value in ids.items():
+            if value.lower() == name_or_id:
+                return key
+
+    return ids[name_or_id]
+
 class Person:
     def __init__(self, name, id=None, paid=0, owes={}, what_for={}):
         self.name = name
@@ -41,7 +57,8 @@ class Person:
         else:
             amount = round(self.owes[payee] - float(amount), 2)
             self.owes[payee] = amount
-        self.buys(f"Payed {payee}", amount)
+        payee_name = get_name_or_id(payee)
+        self.buys(f"Payed {payee_name}", amount)
         self.update()
 
     def update(self):

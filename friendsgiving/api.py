@@ -1,12 +1,9 @@
 from flask import Flask, render_template, request
 from pathlib import Path
-from person import Person
+from person import Person, get_name_or_id, ids
 
+ids = ids
 people = {}
-
-ids = {"156156": "Matteo", "252252": "Nia",
-       "363363": "Grace", "454454": "Nick", 
-       "545545": "Zoe", "656656": "Kye"}
 
 app = Flask(__name__)
 
@@ -25,15 +22,6 @@ def create_people():
 
 
 app.before_request_funcs = [(None, create_people())]
-def get_name_or_id(name_or_id: str,  ids: dict):
-    name_or_id = name_or_id.lower()
-
-    if name_or_id in [x.lower() for x in ids.values()]:
-        for key, value in ids.items():
-            if value.lower() == name_or_id:
-                return key
-
-    return ids[name_or_id]
 
 def get_name_from_id(id):
     global ids
