@@ -32,7 +32,10 @@ class Person:
         self.get_or_set_self_id()
 
     def buys(self, item, value):
-        string = f"{item},${float(value):.2f}," +\
+        with open(self.i_pay_file, "rbU") as f:
+            num_lines = sum(1 for _ in f)
+
+        string = f"{num_lines+1},{item},${float(value):.2f}," +\
                  f"{datetime.now(tz=self.tz).strftime('%Y_%m_%d %H:%M:%S')}\n"
         with open(self.i_pay_file, "a+") as out_file:
             out_file.write(string)
@@ -44,6 +47,8 @@ class Person:
         if not self.id_file.is_file():
             self.update()
             return 1
+
+        # make state independant of server running
         with open(self.id_file) as jsonfile:
             s = json.load(jsonfile) 
             self.name = s['name']
@@ -51,6 +56,10 @@ class Person:
             self.owes = s['owes']
             self.what_for = s['what_for']
             self.total_out = float(s['total_out'])
+
+        # Create payfile to avid errors later
+        with open(self.i_pay_file, "w+") as pay_file:
+            return
     
     def pays(self, payee, amount, all=False):
         amount = 0
@@ -69,9 +78,8 @@ class Person:
         with open(self.i_pay_file) as in_file:
             reader = csv.reader(in_file)
             for line in reader:
-                purchases.append(line)
+                purchases.append(line[1:])
         return purchases
-
 
     def update(self):
         with open(self.id_file, 'w+') as jsonfile:

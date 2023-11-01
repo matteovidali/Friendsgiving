@@ -25,6 +25,7 @@ app.before_request_funcs = [(None, create_people())]
 
 def get_name_from_id(id):
     global ids
+    print(id, type(id))
     return get_name_or_id(id, ids)
 
 def get_id_from_name(name):
@@ -76,7 +77,8 @@ def process_form():
         people[n].what_for[buyer_id].append(item)
         people[n].update()
 
-    return f"Sucessfully purchased {item} for ${amount}. {', '.join(split_with)} will each be charged ${split}"
+    #return f"Sucessfully purchased {item} for ${amount}. {', '.join(split_with)} will each be charged ${split}"
+    return render_template('thanks_for_payment.html', name=get_name_from_id(buyer_id), id=buyer_id)
 
 @app.route('/<id>/process_payment/', methods=['POST'])
 def process_payment(id):
