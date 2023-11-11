@@ -11,8 +11,24 @@ people = {}
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-def create_filesystem():
-    pass
+def create_filesystem(path):
+    path.mkdir(parents=True)
+
+def create_pigeon_data(path, fname):
+    if not path.exists():
+        create_filesystem(path)
+
+    if (path / fname).is_file():
+        return
+
+    pigeon_data = {'num_pigeons': 0,
+                   'pigeon_pictures': {0: f'{path}/assets/null_pigeon.gif'},
+                   'pigeon_desc': {0: 'n̸̍̍͊͑͊̀̓̍̽͛͘͜ų̸̞̲̟̪̲͖͇͈̰̬̋̀̽̈́̍͊̍̍͂l̶̟̼̺̬̖̝̹̦̫̹͖͙̐̂͛͊̈͘̚͜͝l̸̢̠̣̳͎̻̝̗̹͚̇͆̉̽͐̀̉̅͠͠ ̷͉͉̞̥̥̖̍̑ͅp̴̛̖̲͇̜̹͈̤̖̽͐̍̍̐̄̓̇̃̂̾̍͒̚i̵̢̧̨̧̺̮̻͇͆̈́̔̔̀g̴̢͎̮͓̫̯̺͎̣̳͖͛̌͘é̴̛̛̄͊̍̍͌̐͂̎͜õ̵̡̢̙̖̯̪̯̪̀͊͛̒̓̈̀̐́̑̒̈́̌̕͠n̷̥̘̬̳̖̙̳̺̈̓̀̂̐̚͜͝͠'}}
+
+    with open(path / fname, 'w+') as jsonfile:
+        json.dump(pigeon_data, jsonfile)
+
+    return pigeon_data
 
 def resize_image(image_path, size=(300,300)):
     with Image.open(image_path) as img:
@@ -33,7 +49,7 @@ def create_people():
         people[person.id] = person
 
 
-app.before_request_funcs = [(None, create_people())]
+app.before_request_funcs = [(None, create_people()), (None, create_pigeon_data(Path('./static/pigeons'), 'pigeon_metadata.json'))]
 
 def get_name_from_id(id):
     global ids
@@ -51,7 +67,7 @@ def home():
 @app.route('/<id>/')
 def custom(id):
     global people
-    if id not in people.keys():
+    if id not in people.keys() and id != 'pigeon':
         return f"That is not an appropriate secret key."
     return render_template('home.html', name=get_name_from_id(id), id=id)
 
@@ -70,17 +86,6 @@ def what_the_fuck_did_i_buy(id):
     global people,ids
     stuff = people[id].get_purchases()
     return render_template('what_the_fuck_did_i_buy.html', person=people[id], stuff=stuff)
-
-def create_pigeon_data(path, fname):
-
-    pigeon_data = {'num_pigeons': 0,
-                   'pigeon_pictures': {0: f'{path}/assets/null_pigeon.gif'},
-                   'pigeon_desc': {0: 'n̸̍̍͊͑͊̀̓̍̽͛͘͜ų̸̞̲̟̪̲͖͇͈̰̬̋̀̽̈́̍͊̍̍͂l̶̟̼̺̬̖̝̹̦̫̹͖͙̐̂͛͊̈͘̚͜͝l̸̢̠̣̳͎̻̝̗̹͚̇͆̉̽͐̀̉̅͠͠ ̷͉͉̞̥̥̖̍̑ͅp̴̛̖̲͇̜̹͈̤̖̽͐̍̍̐̄̓̇̃̂̾̍͒̚i̵̢̧̨̧̺̮̻͇͆̈́̔̔̀g̴̢͎̮͓̫̯̺͎̣̳͖͛̌͘é̴̛̛̄͊̍̍͌̐͂̎͜õ̵̡̢̙̖̯̪̯̪̀͊͛̒̓̈̀̐́̑̒̈́̌̕͠n̷̥̘̬̳̖̙̳̺̈̓̀̂̐̚͜͝͠'}}
-
-    with open(path / fname, 'w+') as jsonfile:
-        json.dump(pigeon_data, jsonfile)
-
-    return pigeon_data
 
 def pigeon_file_update(path: str, fname:str, image_path: str, desc: str):
     with open(path / fname) as pigeon_file:
