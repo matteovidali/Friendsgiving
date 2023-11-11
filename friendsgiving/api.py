@@ -1,11 +1,22 @@
 from flask import Flask, render_template, request
 from pathlib import Path
 from person import Person, get_name_or_id, ids
+from random import randint
+from PIL import Image
+import json
 
 ids = ids
 people = {}
 
 app = Flask(__name__)
+
+def create_filesystem():
+    pass
+
+def resize_image(image_path, size=(300,300)):
+    with Image.open(image_path) as img:
+        img.thumbnail(size)
+        img.save(image_path)
 
 def create_people():
     global people, ids
@@ -40,7 +51,7 @@ def home():
 def custom(id):
     global people
     if id not in people.keys():
-        return f"That is not an appropriate secret key {people.keys()}"
+        return f"That is not an appropriate secret key."
     return render_template('home.html', name=get_name_from_id(id), id=id)
 
 @app.route('/<id>/expense_splitter/')
@@ -58,6 +69,72 @@ def what_the_fuck_did_i_buy(id):
     global people,ids
     stuff = people[id].get_purchases()
     return render_template('what_the_fuck_did_i_buy.html', person=people[id], stuff=stuff)
+
+def create_pigeon_data(path, fname):
+
+    pigeon_data = {'num_pigeons': 0,
+                   'pigeon_pictures': {0: f'{path}/assets/null_pigeon.gif'},
+                   'pigeon_desc': {0: 'n̸̍̍͊͑͊̀̓̍̽͛͘͜ų̸̞̲̟̪̲͖͇͈̰̬̋̀̽̈́̍͊̍̍͂l̶̟̼̺̬̖̝̹̦̫̹͖͙̐̂͛͊̈͘̚͜͝l̸̢̠̣̳͎̻̝̗̹͚̇͆̉̽͐̀̉̅͠͠ ̷͉͉̞̥̥̖̍̑ͅp̴̛̖̲͇̜̹͈̤̖̽͐̍̍̐̄̓̇̃̂̾̍͒̚i̵̢̧̨̧̺̮̻͇͆̈́̔̔̀g̴̢͎̮͓̫̯̺͎̣̳͖͛̌͘é̴̛̛̄͊̍̍͌̐͂̎͜õ̵̡̢̙̖̯̪̯̪̀͊͛̒̓̈̀̐́̑̒̈́̌̕͠n̷̥̘̬̳̖̙̳̺̈̓̀̂̐̚͜͝͠'}}
+
+    with open(path / fname, 'w+') as jsonfile:
+        json.dump(pigeon_data, jsonfile)
+
+    return pigeon_data
+
+def pigeon_file_update(path: str, fname:str, image_path: str, desc: str):
+    with open(path / fname) as pigeon_file:
+        p_metadata = json.load(pigeon_file)
+
+    p_metadata['num_pigeons'] = int(p_metadata['num_pigeons'])+1
+    np = p_metadata['num_pigeons']
+    print("ADDING PIGEON"+str(np))
+    p_metadata['pigeon_pictures'][np] = image_path
+    p_metadata['pigeon_desc'][np] = desc
+
+    print(p_metadata)
+    with open(path / fname, 'w+') as pfile:
+        json.dump(p_metadata, pfile)
+    #TODO: Update this
+    return p_metadata
+
+@app.route('/pigeon')
+def pigeon():
+    p_path = Path('static/pigeons')
+    r_path = Path('.') / p_path
+    #if not r_path.is_file():
+    #   create_pigeon_data(p_path, 'pigeon_metadata.json')
+
+    with open(p_path / 'pigeon_metadata.json') as jsonfile:
+        p_meta = json.load(jsonfile)
+
+    print(p_meta)
+    num_pigeons = p_meta['num_pigeons']
+    print(num_pigeons)
+    rand_pigeon = randint(0, num_pigeons)
+    pigeon_image = p_meta['pigeon_pictures'][f'{rand_pigeon}']
+    print(pigeon_image)
+    pigeon_desc = p_meta['pigeon_desc'][f'{rand_pigeon}']
+    return render_template('pigeon.html', pigeon_img=pigeon_image, pigeon_desc=pigeon_desc)
+
+@app.route('/i_wanna_submit/submit_a_pigeon', methods=['GET', 'POST'])
+def submit_a_pigeon():
+    if request.method == 'POST':
+        with open('./static/pigeons/pigeon_metadata.json') as json_file:
+            p_data = json.load(json_file)
+
+        np = int(p_data['num_pigeons'])
+        pigeon_image = request.files['pigeon_image']
+        pigeon_desc = request.form['pigeon_desc']
+        # Save the uploaded image to the 'uploads' folder (create the folder if not exists)
+        pigeon_image.save(f'static/pigeons/assets/{np+1}.jpg')
+        resize_image(f'static/pigeons/assets/{np+1}.jpg')
+        pigeon_file_update(Path('static/pigeons'),
+                           'pigeon_metadata.json',
+                           f'static/pigeons/assets/{np+1}.jpg', 
+                           pigeon_desc)
+        #result_message = f"Image '{pigeon_image.filename}' uploaded successfully with description: {pigeon_desc}"
+        return 'wtf man...'
+    return render_template('submit_a_pigeon.html')
 
 @app.route('/process/', methods=['POST'])
 def process_form():

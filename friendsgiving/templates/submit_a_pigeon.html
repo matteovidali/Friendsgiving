@@ -1,0 +1,23 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Pigeon</title>
+</head>
+<body>
+    <h1>Upload Pigeon</h1>
+    
+    <form action="/i_wanna_submit/submit_a_pigeon" method="post" enctype="multipart/form-data">
+        <label for="pigeon_image">Upload Pigeon Image:</label>
+        <input type="file" name="pigeon_image" accept="image/*" required>
+        
+        <label for="pigeon_desc">Pigeon Description:</label>
+        <input type="text" name="pigeon_desc" required>
+        
+        <input type="submit" value="Upload">
+    </form>
+</body>
+</html>
+
