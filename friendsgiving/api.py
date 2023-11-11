@@ -71,17 +71,17 @@ def custom(id):
         return f"That is not an appropriate secret key."
     return render_template('home.html', name=get_name_from_id(id), id=id)
 
-@app.route('/<id>/expense_splitter/')
+@app.route('/<id>/home/expense_splitter/')
 def expense_form(id):
     global people
     return render_template('payment_form.html', people=people.values(), buyer=get_name_from_id(id))
 
-@app.route('/<id>/what_do_i_owe/')
+@app.route('/<id>/home/what_do_i_owe/')
 def what_do_i_owe(id):
     global people,ids
     return render_template('what_do_i_owe.html', person=people[id], secret=id, ids=ids)
 
-@app.route('/<id>/what_the_fuck_did_i_buy/')
+@app.route('/<id>/home/what_the_fuck_did_i_buy/')
 def what_the_fuck_did_i_buy(id):
     global people,ids
     stuff = people[id].get_purchases()
