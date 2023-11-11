@@ -9,6 +9,7 @@ ids = ids
 people = {}
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
 def create_filesystem():
     pass
