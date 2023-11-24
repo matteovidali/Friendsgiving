@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from pathlib import Path
 from person import Person, get_name_or_id, ids
 from random import randint
@@ -62,14 +62,19 @@ def get_id_from_name(name):
 
 @app.route('/')
 def home():
-    return "You must go to this url as follows: <url>/secret_id"
+    return render_template('landing.html')
 
-@app.route('/<id>/')
+@app.route('/<id>/home/', methods=['GET', 'POST'])
 def custom(id):
+    user_id = id
     global people
-    if id not in people.keys() and id != 'pigeon':
+    if user_id not in people.keys() and user_id != 'pigeon':
         return f"That is not an appropriate secret key."
-    return render_template('home.html', name=get_name_from_id(id), id=id)
+    return render_template('home.html', name=get_name_from_id(user_id), id=user_id)
+
+@app.route('/validate/', methods=['GET', 'POST'])
+def go_home():
+    return redirect(url_for("custom", id=request.form['user_id']))
 
 @app.route('/<id>/home/expense_splitter/')
 def expense_form(id):
